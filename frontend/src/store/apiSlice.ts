@@ -7,7 +7,7 @@ import {
 } from "@/types";
 import type { RootState } from "./index";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://lms-backend-application.onrender.com/api";
 
 export const apiSlice = createApi({
   reducerPath: "api",
