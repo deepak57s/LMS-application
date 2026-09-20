@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import AuthGuard from "@/components/AuthGuard";
@@ -28,10 +29,29 @@ export default function ResultPage() {
       ? storedResult
       : fetchedResult;
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // Push barrier state so browser back button triggers popstate directly on the result page
+    window.history.pushState({ resultBarrier: true }, "", window.location.href);
+
+    const handlePopState = () => {
+      dispatch(resetExam());
+      router.replace("/dashboard");
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [dispatch, router]);
+
+
   const handleBackToDashboard = () => {
     dispatch(resetExam());
     router.replace("/dashboard");
   };
+
 
   return (
     <AuthGuard requireAuth={true}>

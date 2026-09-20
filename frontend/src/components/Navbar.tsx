@@ -21,6 +21,13 @@ export default function Navbar() {
 
   const hasActiveExam = !!sessionId;
 
+  const handleLogoClick = (e: React.MouseEvent) => {
+    if (hasActiveExam) {
+      e.preventDefault();
+      setLeaveTarget("dashboard");
+    }
+  };
+
   const handleDashboardClick = (e: React.MouseEvent) => {
     if (hasActiveExam) {
       e.preventDefault();
@@ -52,12 +59,17 @@ export default function Navbar() {
     <>
       <header className="border-b border-slate-200 bg-white/80 backdrop-blur sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 font-bold text-lg text-violet-600 tracking-tight">
+          <Link
+            href="/"
+            onClick={handleLogoClick}
+            className="flex items-center gap-2 font-bold text-lg text-violet-600 tracking-tight"
+          >
             <span className="w-8 h-8 rounded-lg bg-violet-600 text-white flex items-center justify-center text-sm font-black">
               LMS
             </span>
             <span className="text-slate-900 font-extrabold">ExamPlatform</span>
           </Link>
+
 
           <nav className="flex items-center gap-4 text-sm font-medium min-h-[36px]">
             {!mounted ? (

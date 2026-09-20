@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import AuthGuard from "@/components/AuthGuard";
@@ -12,6 +12,8 @@ import {
   prevQuestion,
   goToQuestion,
   setResult,
+  resetExam,
+  hydrateExamSession,
 } from "@/store/slices/examSlice";
 import { useSubmitExamMutation } from "@/store/apiSlice";
 
@@ -26,7 +28,55 @@ export default function ExamSessionPage() {
 
   const [submitExam, { isLoading: isSubmitting }] = useSubmitExamMutation();
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showExitModal, setShowExitModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const isSubmittingRef = useRef(false);
+
+  // Hydrate session from sessionStorage on mount (supports page refresh)
+  useEffect(() => {
+    dispatch(hydrateExamSession());
+  }, [dispatch]);
+
+  // If exam is completed or not active for this route, immediately redirect to dashboard
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const activeSession = sessionStorage.getItem("lms_active_exam_session");
+      if (!activeSession && (!sessionId || sessionId !== routeSessionId)) {
+        router.replace("/dashboard");
+      }
+    }
+  }, [sessionId, routeSessionId, router]);
+
+
+  // Trap browser top back button and tab close
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // Push barrier entry into history so back arrow cannot exit silently
+    window.history.pushState({ examBarrier: true }, "", window.location.href);
+
+    const handlePopState = () => {
+      if (isSubmittingRef.current) return;
+      // Re-push barrier state immediately to keep URL locked on the exam
+      window.history.pushState({ examBarrier: true }, "", window.location.href);
+      // Show explicit warning modal
+      setShowExitModal(true);
+    };
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isSubmittingRef.current) return;
+      e.preventDefault();
+      e.returnValue = "";
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [sessionId, routeSessionId]);
 
   if (!sessionId || sessionId !== routeSessionId || questions.length === 0) {
     return (
@@ -71,6 +121,7 @@ export default function ExamSessionPage() {
   const handleFinalSubmit = async () => {
     setErrorMessage("");
     try {
+      isSubmittingRef.current = true;
       const response = await submitExam({
         sessionId,
         answers,
@@ -79,6 +130,7 @@ export default function ExamSessionPage() {
       dispatch(setResult(response));
       router.replace(`/result/${sessionId}`);
     } catch (err: any) {
+      isSubmittingRef.current = false;
       setShowConfirmModal(false);
       const detail = err?.data?.detail;
       setErrorMessage(
@@ -87,6 +139,12 @@ export default function ExamSessionPage() {
           : "Failed to submit exam. Please try again."
       );
     }
+  };
+
+  const handleConfirmExit = () => {
+    isSubmittingRef.current = true;
+    dispatch(resetExam());
+    router.replace("/dashboard");
   };
 
   return (
@@ -273,6 +331,43 @@ export default function ExamSessionPage() {
                   ) : (
                     "Confirm & Submit"
                   )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Back Button / Navigation Exit Confirmation Modal */}
+        {showExitModal && (
+          <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 animate-scaleUp">
+              <div className="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl font-bold mb-3">
+                ⚠️
+              </div>
+              <h3 className="text-lg font-bold text-slate-900 mb-2">
+                Leave Active Assessment?
+              </h3>
+              <p className="text-sm text-slate-600 leading-relaxed mb-4">
+                You clicked the browser back button. If you leave now, your assessment session will be <strong className="text-slate-900">abandoned</strong> and your answers will not be submitted.
+              </p>
+              <span className="block p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 font-semibold text-xs mb-6">
+                ★ Warning: Progress is not submitted until you click "Submit Exam".
+              </span>
+
+              <div className="flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowExitModal(false)}
+                  className="px-4 py-2 rounded-lg border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition"
+                >
+                  Stay & Continue Test
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmExit}
+                  className="px-5 py-2 rounded-lg bg-red-600 text-white text-xs font-bold hover:bg-red-700 transition shadow-sm"
+                >
+                  Exit to Dashboard
                 </button>
               </div>
             </div>
