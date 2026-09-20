@@ -14,8 +14,6 @@ A production-grade, full-stack Learning Management & Assessment System engineere
 ## 📑 Table of Contents
 
 - [Key Features](#-key-features)
-- [Architecture & Tech Stack](#-architecture--tech-stack)
-- [Repository Structure](#-repository-structure)
 - [Prerequisites](#-prerequisites)
 - [Step-by-Step Setup Guide](#-step-by-step-setup-guide)
   - [1. Clone the Repository](#1-clone-the-repository)
@@ -24,10 +22,7 @@ A production-grade, full-stack Learning Management & Assessment System engineere
   - [4. Frontend Setup](#4-frontend-setup)
   - [5. One-Click Launch (Windows)](#5-one-click-launch-windows)
 - [Application Flow & Walkthrough](#-application-flow--walkthrough)
-- [Security & Anti-Tamper Mechanisms](#-security--anti-tamper-mechanisms)
 - [API Reference](#-api-reference)
-- [Troubleshooting & FAQ](#-troubleshooting--faq)
-- [Pushing to GitHub](#-pushing-to-github)
 
 ---
 
@@ -51,113 +46,6 @@ A production-grade, full-stack Learning Management & Assessment System engineere
 
 ---
 
-## 🛠 Architecture & Tech Stack
-
-```mermaid
-graph LR
-    subgraph Browser ["Frontend (Next.js 16 + Redux Toolkit)"]
-        UI[Tailwind CSS UI]
-        Redux[RTK Store / Slices]
-        APIClient[RTK Query / Fetch]
-        UI --> Redux
-        Redux --> APIClient
-    end
-
-    subgraph Server ["Backend (FastAPI)"]
-        CORS[CORS / Middleware]
-        AuthRouter["/api/auth (JWT + Bcrypt)"]
-        CatalogRouter["/api/catalog (Domains / Topics)"]
-        ExamRouter["/api/exam (Sessions / Grading)"]
-        CORS --> AuthRouter
-        CORS --> CatalogRouter
-        CORS --> ExamRouter
-    end
-
-    subgraph Storage ["Database (MongoDB Atlas)"]
-        Users[(Users Collection)]
-        Domains[(Domains & Topics)]
-        Questions[(Questions Bank)]
-        Sessions[(Exam Sessions)]
-    end
-
-    APIClient -- "REST + Bearer Token" --> CORS
-    AuthRouter <--> Users
-    CatalogRouter <--> Domains
-    ExamRouter <--> Questions
-    ExamRouter <--> Sessions
-```
-
-### Technologies
-
-* **Backend**:
-  * **Language**: Python 3.10+
-  * **Framework**: [FastAPI](https://fastapi.tiangolo.com/) (Async ASGI)
-  * **Server**: [Uvicorn](https://www.uvicorn.org/) (High-performance ASGI server)
-  * **Driver**: [Motor](https://motor.readthedocs.io/) (Async MongoDB driver on top of PyMongo)
-  * **Validation**: [Pydantic v2](https://docs.pydantic.dev/) & [pydantic-settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/)
-  * **Auth & Security**: [python-jose](https://pypi.org/project/python-jose/) (JWT encoding/decoding) & [bcrypt](https://pypi.org/project/bcrypt/)
-* **Frontend**:
-  * **Framework**: [Next.js 16](https://nextjs.org/) (App Router, React 19)
-  * **Language**: TypeScript
-  * **State Management**: [Redux Toolkit](https://redux-toolkit.js.org/) (`@reduxjs/toolkit` & `react-redux`)
-  * **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
-
----
-
-## 📁 Repository Structure
-
-```text
-lms/
-├── backend/
-│   ├── routes/
-│   │   ├── __init__.py
-│   │   ├── auth_routes.py      # Registration, login, profile endpoints
-│   │   ├── catalog_routes.py   # Domains, topics, onboarding endpoints
-│   │   └── exam_routes.py      # Session creation, question delivery, grading
-│   ├── auth.py                 # JWT token creation/verification, password hashing
-│   ├── config.py               # Pydantic Settings and environment management
-│   ├── database.py             # Motor async MongoDB client & collections
-│   ├── main.py                 # FastAPI application factory, CORS, exception handlers
-│   ├── models.py               # Pydantic models for validation and responses
-│   ├── requirements.txt        # Backend Python dependencies
-│   ├── seed.py                 # Database seeder (domains, topics, 20+ questions)
-│   ├── test_api.py             # End-to-end automated API verification suite
-│   ├── .env.example            # Backend environment template
-│   └── .env                    # Active backend environment (git-ignored)
-├── frontend/
-│   ├── public/                 # Static assets and icons
-│   ├── src/
-│   │   ├── app/
-│   │   │   ├── dashboard/      # Learner dashboard page
-│   │   │   ├── exam/[sessionId]/# Interactive assessment screen
-│   │   │   ├── login/          # User login page
-│   │   │   ├── onboarding/     # Domain/Topic selection page
-│   │   │   ├── result/[sessionId]/ # Scorecard and result page
-│   │   │   ├── signup/         # Account registration page
-│   │   │   ├── globals.css     # Global styles & Tailwind directives
-│   │   │   ├── layout.tsx      # Root layout with StoreProvider & Navbar
-│   │   │   └── page.tsx        # Landing hero page
-│   │   ├── components/
-│   │   │   ├── AuthGuard.tsx   # Client route protection component
-│   │   │   ├── Navbar.tsx      # Top navigation with user status & logout
-│   │   │   └── StoreProvider.tsx# Redux Provider wrapper
-│   │   ├── store/
-│   │   │   ├── slices/         # authSlice, examSlice
-│   │   │   ├── apiSlice.ts     # RTK Query API definition
-│   │   │   └── index.ts        # Redux store configuration
-│   │   └── types/              # TypeScript interfaces and models
-│   ├── package.json            # Node.js dependencies and scripts
-│   ├── tsconfig.json           # TypeScript configuration
-│   ├── next.config.ts          # Next.js configuration
-│   ├── .env.example            # Frontend environment template
-│   └── .env.local              # Active frontend environment (git-ignored)
-├── .gitignore                  # Git ignore rules for Python, Node, OS, and Secrets
-├── dev.bat                     # Windows one-click dual-server launcher
-└── README.md                   # Complete documentation
-```
-
----
-
 ## 📋 Prerequisites
 
 Ensure you have the following installed on your machine:
@@ -177,8 +65,8 @@ Ensure you have the following installed on your machine:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
-cd lms
+git clone https://github.com/deepak57s/LMS-application.git
+cd LMS-application
 ```
 
 ---
@@ -369,18 +257,6 @@ This launches two independent command windows:
 
 ---
 
-## 🛡️ Security & Anti-Tamper Mechanisms
-
-| Security Feature | Implementation Mechanism | Benefit |
-| :--- | :--- | :--- |
-| **Answer Masking** | Pydantic response filters exclude `correct_option_index` on `/api/exam/session` | Inspecting network payloads or React state reveals zero answers. |
-| **Server-Side Grading** | Submission endpoint queries DB answer key directly by ObjectId | Users cannot spoof score calculations in the browser. |
-| **Session Locking** | Sessions transition to `completed = True` upon first grading | Retrying or replaying requests returns `400 Bad Request`. |
-| **JWT Authorization** | PyJWT with expiration and signature verification | Protected endpoints require valid `Bearer <token>` headers. |
-| **Password Hashing** | Salting and hashing via `bcrypt` | Plaintext passwords are never stored or logged. |
-
----
-
 ## 🔌 API Reference
 
 ### Authentication Endpoints (`/api/auth`)
@@ -406,81 +282,3 @@ This launches two independent command windows:
 | `GET` | `/api/exam/session/{id}`| Fetch masked exam questions for session | Yes (`Bearer`) |
 | `POST` | `/api/exam/submit` | Submit answers and calculate grade | Yes (`Bearer`) |
 | `GET` | `/api/exam/result/{id}` | Retrieve finalized scorecard | Yes (`Bearer`) |
-
----
-
-## ❓ Troubleshooting & FAQ
-
-### 1. MongoDB Connection Error: `ServerSelectionTimeoutError`
-* **Cause**: Your IP address is not whitelisted in MongoDB Atlas or connection string credentials are wrong.
-* **Fix**: In MongoDB Atlas, go to **Network Access** → Click **Add IP Address** → Choose **Allow Access from Anywhere (`0.0.0.0/0`)**. Double check that your password does not contain unescaped special characters.
-
-### 2. PowerShell Script Execution Disabled (`venv\Scripts\activate`)
-* **Error**: `File ... activate.ps1 cannot be loaded because running scripts is disabled on this system.`
-* **Fix**: Open PowerShell as Administrator or run in your current terminal:
-  ```powershell
-  Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
-  ```
-  Then re-run `venv\Scripts\activate`.
-
-### 3. Port 8000 or Port 3000 Already in Use
-* **Fix**:
-  * For Backend: Run on an alternate port: `uvicorn main:app --reload --port 8001` (update `NEXT_PUBLIC_API_URL` in `frontend/.env.local`).
-  * For Frontend: Next.js will automatically prompt to run on port `3001` if `3000` is busy.
-
-### 4. Running Backend Automated Tests
-To run the automated API verification test suite:
-```bash
-cd backend
-venv\Scripts\activate   # or source venv/bin/activate
-python test_api.py
-```
-
----
-
-## 📤 Pushing to GitHub
-
-Follow these steps to submit this repository to GitHub:
-
-### Step 1: Create a New Repository on GitHub
-1. Log in to [GitHub](https://github.com/).
-2. In the upper-right corner, click **+** and select **New repository**.
-3. Name your repository (e.g., `lms-platform`).
-4. Keep it **Public** (or **Private** based on your submission requirements).
-5. **Do NOT** check "Initialize this repository with a README, .gitignore, or license" (we already have them configured).
-6. Click **Create repository**.
-7. Copy the repository URL (e.g. `https://github.com/YOUR_USERNAME/lms-platform.git`).
-
-### Step 2: Initialize Git and Commit Your Code
-Open your terminal in the root `lms` directory:
-
-```bash
-# 1. Initialize git (if not already done)
-git init
-
-# 2. Stage all project files
-git add .
-
-# 3. Create your initial commit
-git commit -m "feat: complete full-stack LMS and assessment platform"
-```
-
-### Step 3: Link Remote and Push
-Replace `YOUR_USERNAME` and `lms-platform` with your actual GitHub username and repository name:
-
-```bash
-# 4. Set default branch to main
-git branch -M main
-
-# 5. Add remote GitHub origin
-git remote add origin https://github.com/YOUR_USERNAME/lms-platform.git
-
-# 6. Push code to GitHub
-git push -u origin main
-```
-
----
-
-## 📄 License
-
-This project is licensed under the [MIT License](LICENSE).
